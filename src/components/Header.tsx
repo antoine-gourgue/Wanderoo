@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 type TabKey = "vol" | "hotel" | "car";
@@ -48,6 +49,12 @@ const PRESETS: Record<TabKey, Seg[]> = {
   ],
 };
 
+const ROUTE: Record<TabKey, Record<string, string>> = {
+  vol: { type: "vol", from: "PAR", to: "LIS", depart: "2026-03-12", return: "2026-03-16", pax: "1" },
+  hotel: { type: "hotel", to: "LIS", depart: "2026-03-12", return: "2026-03-16", pax: "2" },
+  car: { type: "car", from: "LIS", depart: "2026-03-12", return: "2026-03-16", pax: "1" },
+};
+
 const TabIcon = ({ children }: { children: React.ReactNode }) => (
   <svg
     viewBox="0 0 24 24"
@@ -70,8 +77,14 @@ const SearchIcon = ({ width = 3 }: { width?: number }) => (
 );
 
 export default function Header() {
+  const router = useRouter();
   const [tab, setTab] = useState<TabKey>("vol");
   const [shrink, setShrink] = useState(false);
+
+  const goSearch = () => {
+    const q = new URLSearchParams(ROUTE[tab]).toString();
+    router.push(`/recherche?${q}`);
+  };
 
   useEffect(() => {
     let shrunk = false;
@@ -146,10 +159,7 @@ export default function Header() {
         </div>
 
         <div className="compact">
-          <button
-            className="compact-pill"
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          >
+          <button className="compact-pill" onClick={goSearch}>
             <span className="cp">{TABS.find((t) => t.key === tab)?.label}</span>
             <span className="cp sub">{segs[1].value}</span>
             <span className="cp sub">{segs[2].label}</span>
@@ -183,7 +193,7 @@ export default function Header() {
               <span className="sl">{segs[3].label}</span>
               <span className={`sv${segs[3].placeholder ? " ph" : ""}`}>{segs[3].value}</span>
             </div>
-            <button className="go-btn" aria-label="Rechercher">
+            <button className="go-btn" aria-label="Rechercher" onClick={goSearch}>
               <SearchIcon />
               Rechercher
             </button>
