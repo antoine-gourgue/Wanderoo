@@ -1,5 +1,7 @@
 "use client";
 
+import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -78,6 +80,7 @@ const SearchIcon = ({ width = 3 }: { width?: number }) => (
 
 export default function Header() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [tab, setTab] = useState<TabKey>("vol");
   const [shrink, setShrink] = useState(false);
 
@@ -103,6 +106,8 @@ export default function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const user = session?.user;
+  const initial = (user?.name ?? user?.email ?? "?").charAt(0).toUpperCase();
   const segs = PRESETS[tab];
 
   return (
@@ -144,18 +149,26 @@ export default function Header() {
               <path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18" />
             </svg>
           </button>
-          <button className="profile" aria-label="Menu du profil">
+          <Link
+            className="profile"
+            href={user ? "/compte" : "/connexion"}
+            aria-label={user ? "Mon compte" : "Se connecter"}
+          >
             <span className="burger" aria-hidden="true">
               <span />
               <span />
               <span />
             </span>
             <span className="ava" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.4 0-8 2.6-8 6v2h16v-2c0-3.4-3.6-6-8-6Z" />
-              </svg>
+              {user ? (
+                <b className="ava-init">{initial}</b>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.4 0-8 2.6-8 6v2h16v-2c0-3.4-3.6-6-8-6Z" />
+                </svg>
+              )}
             </span>
-          </button>
+          </Link>
         </div>
 
         <div className="compact">
