@@ -1,3 +1,4 @@
+import CreateAlertButton from "@/components/CreateAlertButton";
 import Header from "@/components/Header";
 import OfferRow from "@/components/OfferRow";
 import { cityName } from "@/lib/format";
@@ -102,6 +103,7 @@ async function FlightResults({
             Données de démonstration — ajoutez un token Travelpayouts pour les vrais prix
           </span>
         ) : null}
+        <CreateAlertButton type="vol" from={from} to={to} bestPrice={offers[0]?.price} />
       </div>
 
       <div className="offers">

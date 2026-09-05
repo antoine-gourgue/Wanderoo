@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import PromoBanner from "@/components/PromoBanner";
 import { favStays, flightsFromParis } from "@/data/destinations";
+import { getFavoriteSlugs } from "@/lib/favorites";
 
 function SectionHeader({ title }: { title: string }) {
   return (
@@ -21,7 +22,8 @@ function SectionHeader({ title }: { title: string }) {
   );
 }
 
-export default function Home() {
+export default async function Home() {
+  const favs = await getFavoriteSlugs();
   return (
     <>
       <Header />
@@ -31,7 +33,7 @@ export default function Home() {
           <SectionHeader title="Vols à petit prix depuis Paris" />
           <div className="grid">
             {flightsFromParis.map((d) => (
-              <DestinationCard key={d.slug} d={d} />
+              <DestinationCard key={d.slug} d={d} saved={favs.has(d.slug)} />
             ))}
           </div>
         </section>
@@ -42,7 +44,7 @@ export default function Home() {
           <SectionHeader title="Séjours coup de cœur" />
           <div className="grid">
             {favStays.map((d) => (
-              <DestinationCard key={d.slug} d={d} />
+              <DestinationCard key={d.slug} d={d} saved={favs.has(d.slug)} />
             ))}
           </div>
         </section>

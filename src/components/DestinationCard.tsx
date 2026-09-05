@@ -1,14 +1,44 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { toggleFavorite } from "@/app/actions/favorites";
 import type { Destination } from "@/data/destinations";
 
 const CARD_SIZES =
   "(max-width:560px) 50vw, (max-width:860px) 50vw, (max-width:1120px) 33vw, 320px";
 
-export default function DestinationCard({ d }: { d: Destination }) {
-  const [saved, setSaved] = useState(false);
+export default function DestinationCard({
+  d,
+  saved: initialSaved = false,
+}: {
+  d: Destination;
+  saved?: boolean;
+}) {
+  const router = useRouter();
+  const [saved, setSaved] = useState(initialSaved);
+  const [, startTransition] = useTransition();
+
+  function onHeart(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    const next = !saved;
+    setSaved(next); // mise à jour optimiste
+    startTransition(async () => {
+      const res = await toggleFavorite({
+        slug: d.slug,
+        label: d.city,
+        imageUrl: d.image,
+      });
+      if ("error" in res) {
+        setSaved(!next);
+        router.push("/connexion");
+      } else {
+        setSaved(res.saved);
+      }
+    });
+  }
 
   return (
     <article className="card">
@@ -18,10 +48,7 @@ export default function DestinationCard({ d }: { d: Destination }) {
           className="heart"
           aria-label={saved ? "Retirer des favoris" : "Enregistrer"}
           aria-pressed={saved}
-          onClick={(e) => {
-            e.stopPropagation();
-            setSaved((s) => !s);
-          }}
+          onClick={onHeart}
         >
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 20.5 4.6 13a4.6 4.6 0 0 1 6.5-6.5l.9.9.9-.9A4.6 4.6 0 1 1 19.4 13z" />

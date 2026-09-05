@@ -24,11 +24,11 @@ export default async function ComptePage() {
         </div>
 
         <div className="account-grid">
-          <Link href="/" className="account-tile">
+          <Link href="/favoris" className="account-tile">
             <h3>Mes favoris</h3>
             <p>Les destinations que vous avez mises de côté.</p>
           </Link>
-          <Link href="/" className="account-tile">
+          <Link href="/alertes" className="account-tile">
             <h3>Mes alertes prix</h3>
             <p>On vous prévient dès qu&apos;un trajet baisse.</p>
           </Link>
