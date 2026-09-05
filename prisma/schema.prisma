@@ -1,0 +1,80 @@
+// Wanderoo — schéma Prisma
+// Comparateur de voyages : comptes, favoris, recherches sauvegardées, alertes prix.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TripType {
+  FLIGHT
+  HOTEL
+  CAR
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  favorites     Favorite[]
+  savedSearches SavedSearch[]
+  priceAlerts   PriceAlert[]
+}
+
+/// Une destination mise de côté par l'utilisateur (le cœur sur une carte).
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slug      String
+  label     String
+  imageUrl  String?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, slug])
+  @@index([userId])
+}
+
+/// Une recherche que l'utilisateur souhaite conserver / relancer.
+model SavedSearch {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        TripType
+  origin      String?
+  destination String?
+  departDate  DateTime?
+  returnDate  DateTime?
+  passengers  Int       @default(1)
+  createdAt   DateTime  @default(now())
+
+  alerts PriceAlert[]
+
+  @@index([userId])
+}
+
+/// Surveillance de prix sur un trajet ; `targetPrice`/`lastPrice` en centimes d'euro.
+model PriceAlert {
+  id            String       @id @default(cuid())
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  savedSearchId String?
+  savedSearch   SavedSearch? @relation(fields: [savedSearchId], references: [id], onDelete: SetNull)
+  type          TripType
+  origin        String?
+  destination   String
+  targetPrice   Int?
+  lastPrice     Int?
+  active        Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([userId])
+}
