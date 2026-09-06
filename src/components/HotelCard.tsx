@@ -8,12 +8,14 @@ import type { HotelOffer } from "@/lib/hotels";
 
 export default function HotelCard({
   hotel,
+  href,
   avg,
   saved: initialSaved = false,
   active,
   onHover,
 }: {
   hotel: HotelOffer;
+  href: string;
   avg: number;
   saved?: boolean;
   active: boolean;
@@ -53,9 +55,7 @@ export default function HotelCard({
   return (
     <a
       className={`hcard${active ? " active" : ""}`}
-      href={hotel.bookingUrl}
-      target="_blank"
-      rel="noopener noreferrer sponsored"
+      href={href}
       onMouseEnter={() => onHover(hotel.id)}
       onMouseLeave={() => onHover(null)}
     >

@@ -1816,6 +1816,546 @@ header#hdr {
   text-decoration: underline;
 }
 
+/* ---------------- Fiche hôtel : calquée sur la fiche logement Airbnb ----------------
+   Mesuré : contenu 1120px, h1 26px/500, galerie 560×452 + 2×2 de 272 (gaps 8, r12),
+   bouton photos 32px r8 #F2F2F2 12px/500, colonnes 7/12 – 4/12, h2 22px/500, sections
+   séparées par #EBEBEB, encart prix 372px r12 padding 24 ombre 0 6px 16px .12 sticky 80,
+   prix 22px/500 souligné, cellules 10px/700 majuscules, bouton Réserver 48px r999 16px/500. */
+.lst {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 0 64px;
+}
+@media (max-width: 1168px) {
+  .lst {
+    padding-inline: 24px;
+  }
+}
+.lst-title {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+.lst-title h1 {
+  font-size: 26px;
+  font-weight: 500;
+  line-height: 30px;
+  margin: 0;
+}
+.lst-actions {
+  display: flex;
+  gap: 8px;
+  flex: none;
+}
+.lst-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: underline;
+  color: var(--text);
+  transition: background 0.15s;
+}
+.lst-action:hover {
+  background: var(--bg-2);
+}
+.lst-action svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 2;
+}
+.lst-action svg.on {
+  fill: var(--rausch);
+  stroke: var(--rausch);
+}
+.gal {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 222px);
+  gap: 8px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.gal-cell {
+  position: relative;
+  background: var(--bg-2);
+}
+.gal-cell img {
+  object-fit: cover;
+  transition: filter 0.2s;
+}
+.gal-cell:hover img {
+  filter: brightness(0.9);
+}
+.gal-main {
+  grid-column: 1 / 3;
+  grid-row: 1 / 3;
+}
+.gal-more {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: #f2f2f2;
+  border: 1px solid var(--text);
+  font-size: 12px;
+  font-weight: 500;
+}
+.gal-more svg {
+  width: 14px;
+  height: 14px;
+}
+.lst-cols {
+  display: grid;
+  grid-template-columns: 7fr 4fr;
+  column-gap: 8.33%;
+  align-items: start;
+}
+.lst-sec {
+  padding: 32px 0;
+  border-bottom: 1px solid var(--border-2);
+}
+.lst-sec-first {
+  padding-top: 40px;
+}
+.lst-sec-last {
+  border-bottom: none;
+}
+.lst-h2 {
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 26px;
+  margin: 0;
+}
+.lst-sub {
+  font-size: 16px;
+  line-height: 20px;
+  margin: 8px 0 0;
+}
+.lst-fav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 24px;
+  padding: 16px 24px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.lst-fav-l {
+  font-size: 16px;
+  font-weight: 600;
+  max-width: 120px;
+  text-align: center;
+  line-height: 20px;
+}
+.lst-fav-m {
+  font-size: 14px;
+  line-height: 18px;
+  max-width: 200px;
+}
+.lst-fav-r {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 24px;
+  border-left: 1px solid var(--border);
+}
+.lst-fav-r b {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 22px;
+}
+.lst-fav-r i {
+  font-style: normal;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+.lst-fav-r small {
+  font-size: 10px;
+  text-decoration: underline;
+}
+.lst-host {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--border-2);
+}
+.lst-host b {
+  display: block;
+  font-size: 16px;
+  font-weight: 500;
+}
+.lst-host small {
+  font-size: 14px;
+  color: var(--text-2);
+}
+.lst-ava {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--text);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+}
+.lst-hl {
+  list-style: none;
+  margin: 0;
+  padding: 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  border-bottom: 1px solid var(--border-2);
+}
+.lst-hl li {
+  display: flex;
+  gap: 16px;
+}
+.lst-hl svg {
+  width: 24px;
+  height: 24px;
+  flex: none;
+}
+.lst-hl b {
+  display: block;
+  font-size: 16px;
+  font-weight: 500;
+}
+.lst-hl small {
+  font-size: 14px;
+  color: var(--text-2);
+}
+.lst-desc {
+  margin: 0;
+  padding: 32px 0;
+  font-size: 16px;
+  line-height: 24px;
+  border-bottom: 1px solid var(--border-2);
+}
+.lst-amen {
+  list-style: none;
+  margin: 24px 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  font-size: 16px;
+}
+.lst-amen li {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.lst-amen svg {
+  width: 24px;
+  height: 24px;
+  flex: none;
+}
+.lst-btn {
+  display: inline-block;
+  padding: 13px 23px;
+  border: 1px solid var(--text);
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.lst-btn:hover {
+  background: var(--bg-2);
+}
+.lst-cal {
+  margin: 0 -24px;
+}
+.lst-cal .cal {
+  padding-top: 8px;
+}
+.lst-cal .cal-toggle {
+  display: none;
+}
+.lst-cal .cal-months {
+  justify-content: flex-start;
+  padding: 0 24px;
+  gap: 40px;
+}
+.lst-cal .cal-month {
+  width: 308px;
+}
+.lst-cal .cal-week,
+.lst-cal .cal-grid {
+  grid-template-columns: repeat(7, 44px);
+}
+.lst-cal .cal-grid {
+  grid-auto-rows: 46px;
+}
+.lst-cal .cal-day > span {
+  width: 40px;
+  height: 40px;
+}
+.lst-cal .cal-foot {
+  padding: 8px 24px 0;
+  justify-content: flex-end;
+}
+.lst-cal .cal-chips {
+  display: none;
+}
+.lst-right {
+  min-width: 0;
+}
+.lst-sticky {
+  position: sticky;
+  top: 80px;
+  padding-top: 40px;
+}
+.lst-notice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 18px;
+}
+.lst-notice svg {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  color: var(--rausch);
+}
+.pbox {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  background: var(--bg);
+}
+.pbox-price {
+  font-size: 22px;
+  font-weight: 500;
+  text-decoration: underline;
+}
+.pbox-sub {
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--text-2);
+}
+.pbox-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 24px 0 16px;
+  border: 1px solid #b0b0b0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.pbox-cell {
+  padding: 10px 12px;
+  min-height: 56px;
+}
+.pbox-cell + .pbox-cell:not(.full) {
+  border-left: 1px solid #b0b0b0;
+}
+.pbox-cell.full {
+  grid-column: 1 / -1;
+  border-top: 1px solid #b0b0b0;
+}
+.pbox-cell small {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 12px;
+  margin-bottom: 4px;
+}
+.pbox-cell span {
+  font-size: 14px;
+}
+.pbox-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  border-radius: 999px;
+  background: var(--rausch);
+  background-image: var(--grad);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  transition: filter 0.15s;
+}
+.pbox-btn:hover {
+  filter: brightness(1.05);
+}
+.pbox-note {
+  margin: 8px 0 16px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-2);
+}
+.pbox-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 16px;
+}
+.pbox-line {
+  display: flex;
+  justify-content: space-between;
+}
+.pbox-line.total {
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-weight: 600;
+}
+.lst-demo {
+  margin: 16px 0 0;
+  font-size: 12px;
+  color: var(--text-2);
+}
+.lst-wide {
+  margin-top: 0;
+}
+.lst-rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 22px;
+  font-weight: 500;
+}
+.lst-rating svg {
+  width: 20px;
+  height: 20px;
+  fill: var(--text);
+}
+.lst-cats {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 24px;
+  margin: 32px 0 40px;
+}
+.lst-cat small {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+}
+.lst-cat b {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 4px 0 8px;
+}
+.lst-bar {
+  display: block;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+}
+.lst-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--text);
+}
+.lst-revs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px 80px;
+}
+.lst-rev .who {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.lst-rev .who b {
+  display: block;
+  font-size: 16px;
+  font-weight: 500;
+}
+.lst-rev .who small {
+  font-size: 14px;
+  color: var(--text-2);
+}
+.lst-rev p {
+  margin: 12px 0 0;
+  font-size: 16px;
+  line-height: 24px;
+}
+.lst-map {
+  margin-top: 24px;
+}
+.lst-map .map-wrap {
+  height: 480px;
+}
+.lst-know {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 24px;
+}
+.lst-know h3 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.lst-know ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+  line-height: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+@media (max-width: 960px) {
+  .lst-cols {
+    grid-template-columns: 1fr;
+  }
+  .lst-sticky {
+    position: static;
+    padding-top: 24px;
+  }
+  .gal {
+    grid-template-columns: 1fr;
+    grid-template-rows: 300px;
+  }
+  .gal-cell:not(.gal-main) {
+    display: none;
+  }
+  .gal-main {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .lst-cats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .lst-revs,
+  .lst-know {
+    grid-template-columns: 1fr;
+  }
+  .lst-cal .cal-months {
+    flex-direction: column;
+  }
+}
+
 /* ---------------- Modale Filtres (mesurée sur airbnb.fr) ----------------
    Dialogue 568px r32, ombre 0 8px 28px .28, en-tête 64px titre 16px/600, contenu
    padding 24, sections 18px/500 séparées par #EBEBEB, pills 36px/14px r999, histogramme
