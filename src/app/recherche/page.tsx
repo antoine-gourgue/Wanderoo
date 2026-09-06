@@ -1,7 +1,10 @@
 import Header, { type CompactSearch } from "@/components/Header";
+import HotelResults from "@/components/HotelResults";
 import OffersList from "@/components/OffersList";
 import RouteSidePanel from "@/components/RouteSidePanel";
+import { getFavoriteSlugs } from "@/lib/favorites";
 import { cityName } from "@/lib/format";
+import { searchHotels } from "@/lib/hotels";
 import { searchFlights } from "@/lib/travelpayouts";
 
 type SP = Record<string, string | string[] | undefined>;
@@ -26,14 +29,17 @@ export default async function RecherchePage({ searchParams }: { searchParams: Pr
   const depart = one(sp.depart) ?? "2026-03-12";
   const ret = one(sp.return);
   const pax = Number(one(sp.pax) ?? "1") || 1;
+  const children = Number(one(sp.children) ?? "0") || 0;
+  const rooms = Number(one(sp.rooms) ?? "1") || 1;
   const fromName = one(sp.fromName) ?? cityName(from);
   const toName = one(sp.toName) ?? cityName(to);
 
   const dateLabel = [frDate(depart), frDate(ret)].filter(Boolean).join(" – ");
-  const paxLabel = `${pax} voyageur${pax > 1 ? "s" : ""}`;
+  const travellers = pax + children;
+  const paxLabel = `${travellers} voyageur${travellers > 1 ? "s" : ""}`;
 
   const compact: CompactSearch = {
-    label: `${fromName} → ${toName}`,
+    label: tab === "vol" ? `${fromName} → ${toName}` : `${toName} · ${tab === "hotel" ? "Hôtels" : "Voiture"}`,
     dates: dateLabel || "Dates",
     pax: paxLabel,
     tab,
@@ -43,22 +49,34 @@ export default async function RecherchePage({ searchParams }: { searchParams: Pr
       depart,
       ret: ret ?? "",
       pax,
+      children,
+      rooms,
     },
   };
 
-  if (tab !== "vol") {
+  if (tab === "car") {
     return (
       <>
         <Header compact={compact} />
         <main className="wrap res-body">
           <div className="soon">
             <h2>Bientôt disponible</h2>
-            <p>
-              La comparaison {tab === "hotel" ? "d'hôtels" : "de voitures"} arrive très vite. Pour l&apos;instant, seuls les
-              vols sont comparés.
-            </p>
+            <p>La comparaison de voitures de location arrive très vite.</p>
           </div>
         </main>
+      </>
+    );
+  }
+
+  if (tab === "hotel") {
+    const [{ hotels, source, center }, favs] = await Promise.all([
+      searchHotels({ city: to, cityName: toName, checkIn: depart, checkOut: ret ?? depart, adults: pax, children, rooms }),
+      getFavoriteSlugs(),
+    ]);
+    return (
+      <>
+        <Header compact={compact} />
+        <HotelResults hotels={hotels} center={center} title={toName} demo={source === "mock"} savedSlugs={[...favs]} />
       </>
     );
   }
