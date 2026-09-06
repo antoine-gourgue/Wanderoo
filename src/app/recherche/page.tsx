@@ -1,7 +1,9 @@
+import CarResults from "@/components/CarResults";
 import Header, { type CompactSearch } from "@/components/Header";
 import HotelResults from "@/components/HotelResults";
 import OffersList from "@/components/OffersList";
 import RouteSidePanel from "@/components/RouteSidePanel";
+import { searchCars } from "@/lib/cars";
 import { getFavoriteSlugs } from "@/lib/favorites";
 import { cityName } from "@/lib/format";
 import { searchHotels } from "@/lib/hotels";
@@ -55,15 +57,14 @@ export default async function RecherchePage({ searchParams }: { searchParams: Pr
   };
 
   if (tab === "car") {
+    const [{ cars, source }, favs] = await Promise.all([
+      searchCars({ pickup: from, pickupName: fromName, dropoffName: toName, from: depart, to: ret ?? depart, drivers: pax }),
+      getFavoriteSlugs(),
+    ]);
     return (
       <>
-        <Header compact={compact} />
-        <main className="wrap res-body">
-          <div className="soon">
-            <h2>Bientôt disponible</h2>
-            <p>La comparaison de voitures de location arrive très vite.</p>
-          </div>
-        </main>
+        <Header compact={{ ...compact, label: `${fromName} · Voiture`, pax: `${pax} conducteur${pax > 1 ? "s" : ""}` }} />
+        <CarResults cars={cars} cityName={fromName} dateLabel={dateLabel} demo={source === "mock"} savedSlugs={[...favs]} />
       </>
     );
   }

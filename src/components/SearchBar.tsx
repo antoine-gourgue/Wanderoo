@@ -135,12 +135,14 @@ export default function SearchBar({ tab, initial }: { tab: TabKey; initial?: Sea
 
   function submit() {
     if (!isHotel && !origin) return openField("origin");
-    if (!destination) return openField("destination");
+    // Voiture : la restitution vaut par défaut l'agence de prise en charge.
+    const dest = destination ?? (tab === "car" ? origin : null);
+    if (!dest) return openField("destination");
     if (!depart || !ret) return openField("dates");
     const params = new URLSearchParams({
       type: tab,
-      to: destination.code,
-      toName: destination.name.split(",")[0],
+      to: dest.code,
+      toName: dest.name.split(",")[0],
       depart,
       return: ret,
       pax: String(pax),
