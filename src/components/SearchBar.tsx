@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { Place } from "@/app/api/places/route";
+import DateRangeCalendar from "@/components/DateRangeCalendar";
 
 type TabKey = "vol" | "hotel" | "car";
 type Field = "origin" | "destination" | "dates" | "pax";
@@ -22,12 +23,6 @@ const POPULAR: (Place & { hint: string })[] = [
   { code: "LON", name: "Londres, Angleterre", country: "Royaume-Uni", type: "city", hint: "Célèbre pour des sites comme : Big Ben" },
 ];
 
-function todayPlus(days: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
-}
-
 function frShort(iso: string): string {
   if (!iso) return "";
   const d = new Date(`${iso}T12:00:00Z`);
@@ -41,8 +36,8 @@ export default function SearchBar({ tab }: { tab: TabKey }) {
 
   const [origin, setOrigin] = useState<Place | null>({ code: "PAR", name: "Paris", country: "France", type: "city" });
   const [destination, setDestination] = useState<Place | null>(null);
-  const [depart, setDepart] = useState(todayPlus(21));
-  const [ret, setRet] = useState(todayPlus(25));
+  const [depart, setDepart] = useState("");
+  const [ret, setRet] = useState("");
   const [pax, setPax] = useState(1);
 
   const [open, setOpen] = useState<Field | null>(null);
@@ -108,6 +103,7 @@ export default function SearchBar({ tab }: { tab: TabKey }) {
   function submit() {
     if (!origin) return openField("origin");
     if (!destination) return openField("destination");
+    if (!depart || !ret) return openField("dates");
     const params = new URLSearchParams({
       type: tab,
       from: origin.code,
@@ -171,9 +167,29 @@ export default function SearchBar({ tab }: { tab: TabKey }) {
           onKeyDown={(e) => e.key === "Enter" && openField("dates")}
         >
           <span className="sl">{labels.dates}</span>
-          <span className="sv filled">
-            {frShort(depart)} – {frShort(ret)}
-          </span>
+          {depart ? (
+            <span className="sv filled">
+              {frShort(depart)} – {ret ? frShort(ret) : "?"}
+            </span>
+          ) : (
+            <span className="sv">Quand ?</span>
+          )}
+          {depart && open === "dates" ? (
+            <button
+              type="button"
+              className="seg-clear"
+              aria-label="Effacer les dates"
+              onClick={(e) => {
+                e.stopPropagation();
+                setDepart("");
+                setRet("");
+              }}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden="true">
+                <path d="M6 6l12 12M18 6 6 18" />
+              </svg>
+            </button>
+          ) : null}
         </div>
         <span className="sdiv" />
         <div
@@ -240,14 +256,15 @@ export default function SearchBar({ tab }: { tab: TabKey }) {
 
       {open === "dates" ? (
         <div className="pop pop-dates">
-          <label className="pop-field">
-            <span>Aller</span>
-            <input type="date" value={depart} min={todayPlus(0)} onChange={(e) => setDepart(e.target.value)} />
-          </label>
-          <label className="pop-field">
-            <span>Retour</span>
-            <input type="date" value={ret} min={depart} onChange={(e) => setRet(e.target.value)} />
-          </label>
+          <DateRangeCalendar
+            start={depart}
+            end={ret}
+            onChange={(s, e) => {
+              setDepart(s);
+              setRet(e);
+              if (s && e) openField("pax");
+            }}
+          />
         </div>
       ) : null}
 
