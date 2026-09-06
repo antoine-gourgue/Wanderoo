@@ -137,7 +137,7 @@ async function fetchLive(p: HotelSearchParams, token: string): Promise<HotelOffe
         nights,
         total: perNight * nights,
         currency: "EUR",
-        images: [1, 2, 3].map((n) => hotellookPhoto(id, n)),
+        images: [1, 2, 3, 4, 5].map((n) => hotellookPhoto(id, n)),
         badge: i % 4 === 0 ? "Coup de cœur voyageurs" : undefined,
         amenities: AMENITIES.filter(() => rnd() < 0.45),
         freeCancel: rnd() < 0.6,
@@ -183,7 +183,7 @@ function mockHotels(p: HotelSearchParams): HotelOffer[] {
       nights,
       total: perNight * nights,
       currency: "EUR",
-      images: [0, 1, 2].map((k) => `/hotels/h${((i * 3 + k) % 12) + 1}.jpg`),
+      images: [0, 1, 2, 3, 4].map((k) => `/hotels/h${((i * 3 + k) % 12) + 1}.jpg`),
       badge: badgeRoll < 0.3 ? "Coup de cœur voyageurs" : badgeRoll < 0.42 ? "Superhôte" : undefined,
       amenities: AMENITIES.filter(() => rnd() < 0.45),
       freeCancel: rnd() < 0.6,
@@ -212,4 +212,59 @@ export async function searchHotels(p: HotelSearchParams): Promise<HotelSearchRes
   }
   const hotels = mockHotels(p).sort((a, b) => a.total - b.total);
   return { hotels, source: "mock", center };
+}
+
+/** Retrouve un hôtel d'une recherche par son id (la liste simulée est déterministe). */
+export async function findHotel(p: HotelSearchParams, id: string): Promise<{ hotel: HotelOffer; source: "live" | "mock" } | null> {
+  const { hotels, source } = await searchHotels(p);
+  const hotel = hotels.find((h) => h.id === id);
+  return hotel ? { hotel, source } : null;
+}
+
+/* -------------------- Contenu de la fiche (dérivé, déterministe) -------------------- */
+
+export type HotelDetails = {
+  description: string;
+  highlights: { title: string; sub: string }[];
+  categories: { label: string; score: number }[];
+  reviews: { name: string; date: string; text: string; score: number }[];
+};
+
+const FIRST_NAMES = ["Camille", "Julien", "Sofia", "Marc", "Lena", "Hugo", "Inès", "Thomas", "Chloé", "Nils", "Amira", "Paul"];
+const MONTHS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+const REVIEW_TEXTS = [
+  "Très bel hôtel, chambre calme et propre. Le personnel est aux petits soins et le petit-déjeuner copieux.",
+  "Emplacement parfait pour visiter à pied. Literie confortable, salle de bain moderne. Nous reviendrons.",
+  "Accueil chaleureux et check-in rapide. La chambre donnait sur une cour, aucun bruit la nuit.",
+  "Bon rapport qualité-prix. Quelques finitions un peu datées mais tout était impeccable.",
+  "Le rooftop et le bar valent le détour. Chambre spacieuse, wifi rapide, idéal pour un week-end.",
+  "Séjour agréable : hôtel bien situé, équipe souriante, petits détails soignés. Je recommande.",
+];
+
+export function hotelDetails(h: HotelOffer): HotelDetails {
+  const rnd = mulberry32(hashString(h.id));
+  const cat = () => Math.round(Math.min(5, Math.max(3.8, h.rating + (rnd() - 0.5) * 0.4)) * 10) / 10;
+  const categories = ["Propreté", "Exactitude", "Arrivée", "Communication", "Emplacement", "Qualité-prix"].map((label) => ({ label, score: cat() }));
+  const reviews = Array.from({ length: 6 }, (_, k) => ({
+    name: FIRST_NAMES[(k + Math.floor(rnd() * FIRST_NAMES.length)) % FIRST_NAMES.length],
+    date: `${MONTHS[Math.floor(rnd() * 12)]} 2026`,
+    text: REVIEW_TEXTS[(k + Math.floor(rnd() * REVIEW_TEXTS.length)) % REVIEW_TEXTS.length],
+    score: rnd() < 0.8 ? 5 : 4,
+  }));
+  const highlights = [
+    h.distanceKm < 2
+      ? { title: "Emplacement idéal", sub: `À ${h.distanceKm} km du centre de ${h.city}, dans le quartier ${h.area}.` }
+      : { title: "Au calme", sub: `À ${h.distanceKm} km du centre, dans le quartier ${h.area}.` },
+    h.freeCancel
+      ? { title: "Annulation gratuite", sub: "Annulez sans frais jusqu'à 24 h avant l'arrivée." }
+      : { title: "Tarif tout compris", sub: "Taxes et frais inclus dans le prix affiché." },
+    h.breakfast
+      ? { title: "Petit-déjeuner inclus", sub: "Servi chaque matin au restaurant de l'hôtel." }
+      : { title: "Réception 24 h/24", sub: "Arrivée possible à toute heure, bagagerie disponible." },
+  ];
+  const amen = h.amenities.slice(0, 3).map((a) => a.toLowerCase()).join(", ");
+  const description = `${h.name} est un hôtel ${h.stars} étoiles situé dans le quartier ${h.area}, à ${h.distanceKm} km du centre de ${h.city}. ${
+    amen ? `Vous y trouverez ${amen}. ` : ""
+  }Les chambres, climatisées et calmes, sont pensées pour les courts séjours comme pour les longs ; l'équipe de réception vous accueille avec ses conseils sur le quartier.`;
+  return { description, highlights, categories, reviews };
 }

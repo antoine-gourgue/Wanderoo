@@ -74,10 +74,19 @@ export default async function RecherchePage({ searchParams }: { searchParams: Pr
       searchHotels({ city: to, cityName: toName, checkIn: depart, checkOut: ret ?? depart, adults: pax, children, rooms }),
       getFavoriteSlugs(),
     ]);
+    const hotelQuery = new URLSearchParams({
+      to,
+      toName,
+      depart,
+      return: ret ?? depart,
+      pax: String(pax),
+      children: String(children),
+      rooms: String(rooms),
+    }).toString();
     return (
       <>
         <Header compact={compact} />
-        <HotelResults hotels={hotels} center={center} title={toName} demo={source === "mock"} savedSlugs={[...favs]} />
+        <HotelResults hotels={hotels} center={center} title={toName} demo={source === "mock"} savedSlugs={[...favs]} query={hotelQuery} />
       </>
     );
   }

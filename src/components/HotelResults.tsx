@@ -32,12 +32,15 @@ export default function HotelResults({
   title,
   demo,
   savedSlugs,
+  query,
 }: {
   hotels: HotelOffer[];
   center: { lat: number; lng: number };
   title: string;
   demo: boolean;
   savedSlugs: string[];
+  /** Paramètres de recherche à propager vers la fiche hôtel. */
+  query: string;
 }) {
   const [active, setActive] = useState<Set<string>>(() => new Set());
   const [hoverId, setHoverId] = useState<string | null>(null);
@@ -107,7 +110,15 @@ export default function HotelResults({
           ) : (
             <div className="res-grid">
               {visible.map((h) => (
-                <HotelCard key={h.id} hotel={h} avg={avg} saved={saved.has(`hotel-${h.id}`)} active={h.id === hoverId} onHover={setHoverId} />
+                <HotelCard
+                  key={h.id}
+                  hotel={h}
+                  href={`/hotel/${encodeURIComponent(h.id)}?${query}`}
+                  avg={avg}
+                  saved={saved.has(`hotel-${h.id}`)}
+                  active={h.id === hoverId}
+                  onHover={setHoverId}
+                />
               ))}
             </div>
           )}
