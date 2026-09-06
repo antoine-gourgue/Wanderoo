@@ -1,19 +1,15 @@
 const COLS: { title: string; links: string[] }[] = [
   {
     title: "Assistance",
-    links: ["Centre d'aide", "Annuler une réservation", "Signaler un problème", "Nous contacter"],
+    links: ["Centre d'aide", "Annuler une réservation", "Signaler un problème", "Options d'annulation", "Nous contacter"],
   },
   {
-    title: "Découvrir",
-    links: ["Vols pas chers", "Hôtels", "Location de voiture", "Alertes prix"],
+    title: "Voyager avec Wanderoo",
+    links: ["Vols pas chers", "Hôtels", "Location de voiture", "Alertes prix", "Destinations populaires"],
   },
   {
     title: "Wanderoo",
-    links: ["À propos", "Comment on se finance", "Partenaires affiliés", "Recrutement"],
-  },
-  {
-    title: "Restons en contact",
-    links: ["Newsletter bons plans", "Instagram", "TikTok", "X (Twitter)"],
+    links: ["À propos", "Comment on se finance", "Partenaires affiliés", "Recrutement", "Presse"],
   },
 ];
 
@@ -38,7 +34,7 @@ export default function Footer() {
           <span className="sep">·</span>
           <a href="#">Confidentialité</a>
           <span className="sep">·</span>
-          <a href="#">CGU</a>
+          <a href="#">Conditions générales</a>
           <span className="sep">·</span>
           <a href="#">Plan du site</a>
           <span className="right">

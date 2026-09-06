@@ -2,12 +2,22 @@
 
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import SearchBar from "@/components/SearchBar";
 
-type TabKey = "vol" | "hotel" | "car";
+type TabKey = "all" | "vol" | "hotel" | "car";
 
 const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
+  {
+    key: "all",
+    label: "Tout voir",
+    icon: (
+      <>
+        <circle cx="12" cy="12" r="9" />
+        <path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18" />
+      </>
+    ),
+  },
   {
     key: "vol",
     label: "Vols",
@@ -29,42 +39,17 @@ const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   },
 ];
 
-const TabIcon = ({ children }: { children: React.ReactNode }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    {children}
-  </svg>
-);
-
 export default function Header() {
   const { data: session } = useSession();
-  const [tab, setTab] = useState<TabKey>("vol");
-  const [shrink, setShrink] = useState(false);
-
-  useEffect(() => {
-    let shrunk = false;
-    const onScroll = () => {
-      const y = window.scrollY;
-      if (!shrunk && y > 90) {
-        shrunk = true;
-        setShrink(true);
-      } else if (shrunk && y < 30) {
-        shrunk = false;
-        setShrink(false);
-      }
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  const [tab, setTab] = useState<TabKey>("all");
 
   const user = session?.user;
   const initial = (user?.name ?? user?.email ?? "?").charAt(0).toUpperCase();
-  const tabLabel = TABS.find((t) => t.key === tab)?.label;
 
   return (
-    <header id="hdr" className={shrink ? "shrink" : undefined}>
+    <header id="hdr">
       <div className="wrap hdr-main">
-        <a className="logo" href="/" aria-label="Wanderoo, accueil">
+        <Link className="logo" href="/" aria-label="Wanderoo, accueil">
           <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
             <path
               d="M16 2c-5 0-9 3.9-9 9 0 6.2 7.4 12.9 8.4 13.7a.9.9 0 0 0 1.2 0C17.6 23.9 25 17.2 25 11c0-5.1-4-9-9-9Z"
@@ -73,20 +58,24 @@ export default function Header() {
             <circle cx="16" cy="11" r="3.4" fill="#fff" />
           </svg>
           <span className="word">wanderoo</span>
-        </a>
+        </Link>
 
-        <div className="tabs" role="tablist" aria-label="Type de recherche">
+        <nav className="tabs" role="tablist" aria-label="Type de recherche">
           {TABS.map((t) => (
             <button key={t.key} className="tab" role="tab" aria-selected={tab === t.key} onClick={() => setTab(t.key)}>
-              <TabIcon>{t.icon}</TabIcon>
+              <span className="tab-ic" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round">
+                  {t.icon}
+                </svg>
+              </span>
               {t.label}
             </button>
           ))}
-        </div>
+        </nav>
 
         <div className="hdr-right">
           <a className="hlink" href="#">
-            Aide
+            Devenir partenaire
           </a>
           <button className="iconround" aria-label="Langue et région">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
@@ -94,42 +83,20 @@ export default function Header() {
               <path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18" />
             </svg>
           </button>
-          <Link className="profile" href={user ? "/compte" : "/connexion"} aria-label={user ? "Mon compte" : "Se connecter"}>
-            <span className="burger" aria-hidden="true">
-              <span />
-              <span />
-              <span />
-            </span>
-            <span className="ava" aria-hidden="true">
-              {user ? (
-                <b className="ava-init">{initial}</b>
-              ) : (
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.4 0-8 2.6-8 6v2h16v-2c0-3.4-3.6-6-8-6Z" />
-                </svg>
-              )}
-            </span>
-          </Link>
-        </div>
-
-        <div className="compact">
-          <button className="compact-pill" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-            <span className="cp">{tabLabel}</span>
-            <span className="cp sub">Destination</span>
-            <span className="cp sub">Dates</span>
-            <span className="cp sub">Voyageurs</span>
-            <span className="cp-go">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <circle cx="11" cy="11" r="7" />
-                <path d="m20 20-3.2-3.2" />
+          <Link className="iconround menu" href={user ? "/compte" : "/connexion"} aria-label={user ? "Mon compte" : "Menu"}>
+            {user ? (
+              <b className="ava-init">{initial}</b>
+            ) : (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true">
+                <path d="M4 7h16M4 12h16M4 17h16" />
               </svg>
-            </span>
-          </button>
+            )}
+          </Link>
         </div>
       </div>
 
       <div className="wrap hdr-search">
-        <SearchBar tab={tab} />
+        <SearchBar tab={tab === "all" ? "vol" : tab} />
       </div>
     </header>
   );
