@@ -10,7 +10,7 @@ type Field = "origin" | "destination" | "dates" | "pax";
 
 const LABELS: Record<TabKey, Record<Field, string>> = {
   vol: { origin: "Départ", destination: "Destination", dates: "Dates", pax: "Voyageurs" },
-  hotel: { origin: "Destination", destination: "Quartier", dates: "Séjour", pax: "Voyageurs" },
+  hotel: { origin: "Destination", destination: "Destination", dates: "Dates", pax: "Voyageurs" },
   car: { origin: "Prise en charge", destination: "Restitution", dates: "Dates", pax: "Conducteur" },
 };
 
@@ -29,18 +29,39 @@ function frShort(iso: string): string {
   return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", timeZone: "UTC" }).format(d);
 }
 
+const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
+
 export type SearchInitial = {
   origin?: Place | null;
   destination?: Place | null;
   depart?: string;
   ret?: string;
   pax?: number;
+  children?: number;
+  rooms?: number;
+};
+
+type GuestKey = "adults" | "children" | "rooms";
+type GuestRow = { key: GuestKey; title: string; sub: string; min: number; max: number };
+
+const GUEST_ROWS: Record<TabKey, GuestRow[]> = {
+  vol: [
+    { key: "adults", title: "Adultes", sub: "13 ans et plus", min: 1, max: 9 },
+    { key: "children", title: "Enfants", sub: "De 2 à 12 ans", min: 0, max: 6 },
+  ],
+  hotel: [
+    { key: "adults", title: "Adultes", sub: "18 ans et plus", min: 1, max: 9 },
+    { key: "children", title: "Enfants", sub: "De 2 à 17 ans", min: 0, max: 6 },
+    { key: "rooms", title: "Chambres", sub: "Une chambre par réservation minimum", min: 1, max: 5 },
+  ],
+  car: [{ key: "adults", title: "Conducteurs", sub: "25 ans et plus", min: 1, max: 4 }],
 };
 
 export default function SearchBar({ tab, initial }: { tab: TabKey; initial?: SearchInitial }) {
   const router = useRouter();
   const wrapRef = useRef<HTMLDivElement>(null);
   const segRefs = useRef<Partial<Record<Field, HTMLDivElement | null>>>({});
+  const isHotel = tab === "hotel";
 
   const [origin, setOrigin] = useState<Place | null>(
     initial?.origin ?? { code: "PAR", name: "Paris", country: "France", type: "city" },
@@ -49,6 +70,8 @@ export default function SearchBar({ tab, initial }: { tab: TabKey; initial?: Sea
   const [depart, setDepart] = useState(initial?.depart ?? "");
   const [ret, setRet] = useState(initial?.ret ?? "");
   const [pax, setPax] = useState(initial?.pax ?? 1);
+  const [children, setChildren] = useState(initial?.children ?? 0);
+  const [rooms, setRooms] = useState(initial?.rooms ?? 1);
 
   const [open, setOpen] = useState<Field | null>(null);
   const [query, setQuery] = useState("");
@@ -111,22 +134,39 @@ export default function SearchBar({ tab, initial }: { tab: TabKey; initial?: Sea
   }
 
   function submit() {
-    if (!origin) return openField("origin");
+    if (!isHotel && !origin) return openField("origin");
     if (!destination) return openField("destination");
     if (!depart || !ret) return openField("dates");
     const params = new URLSearchParams({
       type: tab,
-      from: origin.code,
       to: destination.code,
-      fromName: origin.name.split(",")[0],
       toName: destination.name.split(",")[0],
       depart,
       return: ret,
       pax: String(pax),
+      children: String(children),
     });
+    if (!isHotel && origin) {
+      params.set("from", origin.code);
+      params.set("fromName", origin.name.split(",")[0]);
+    }
+    if (isHotel) params.set("rooms", String(rooms));
     setOpen(null);
     router.push(`/recherche?${params.toString()}`);
   }
+
+  const getCount = (k: GuestKey) => (k === "adults" ? pax : k === "children" ? children : rooms);
+  const bump = (row: GuestRow, delta: number) => {
+    if (row.key === "adults") setPax((v) => clamp(v + delta, row.min, row.max));
+    else if (row.key === "children") setChildren((v) => clamp(v + delta, row.min, row.max));
+    else setRooms((v) => clamp(v + delta, row.min, row.max));
+  };
+
+  const travellers = pax + children;
+  const paxText =
+    tab === "car"
+      ? `${pax} conducteur${pax > 1 ? "s" : ""}`
+      : `${travellers} voyageur${travellers > 1 ? "s" : ""}${isHotel && rooms > 1 ? ` · ${rooms} chambres` : ""}`;
 
   const isPlaceOpen = open === "origin" || open === "destination";
   const list = query.trim().length >= 2 ? results : POPULAR;
@@ -144,13 +184,7 @@ export default function SearchBar({ tab, initial }: { tab: TabKey; initial?: Sea
     >
       <span className="sl">{labels[field]}</span>
       {open === field ? (
-        <input
-          className="sv-input"
-          autoFocus
-          placeholder={placeholder}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+        <input className="sv-input" autoFocus placeholder={placeholder} value={query} onChange={(e) => setQuery(e.target.value)} />
       ) : place ? (
         <span className="sv filled">{place.name.split(",")[0]}</span>
       ) : (
@@ -162,8 +196,12 @@ export default function SearchBar({ tab, initial }: { tab: TabKey; initial?: Sea
   return (
     <div className="searchbar-wrap" ref={wrapRef}>
       <div className={`searchpill${open ? " open" : ""}`} role="search">
-        {renderPlaceSeg("origin", origin, "Rechercher une ville")}
-        <span className="sdiv" />
+        {!isHotel ? (
+          <>
+            {renderPlaceSeg("origin", origin, "Rechercher une ville")}
+            <span className="sdiv" />
+          </>
+        ) : null}
         {renderPlaceSeg("destination", destination, "Rechercher une destination")}
         <span className="sdiv" />
         <div
@@ -214,9 +252,7 @@ export default function SearchBar({ tab, initial }: { tab: TabKey; initial?: Sea
         >
           <span className="seg-text">
             <span className="sl">{labels.pax}</span>
-            <span className={`sv${pax > 0 ? " filled" : ""}`}>
-              {pax} {tab === "car" ? "conducteur" : pax > 1 ? "voyageurs" : "voyageur"}
-            </span>
+            <span className="sv filled">{paxText}</span>
           </span>
           <button
             className={`go-btn${open ? " expanded" : ""}`}
@@ -280,21 +316,26 @@ export default function SearchBar({ tab, initial }: { tab: TabKey; initial?: Sea
 
       {open === "pax" ? (
         <div className="pop pop-pax">
-          <div className="pax-row">
-            <div>
-              <b>{tab === "car" ? "Conducteurs" : "Adultes"}</b>
-              <small>{tab === "car" ? "25 ans et plus" : "13 ans et plus"}</small>
-            </div>
-            <div className="stepper">
-              <button type="button" onClick={() => setPax((p) => Math.max(1, p - 1))} disabled={pax <= 1} aria-label="Retirer">
-                −
-              </button>
-              <span>{pax}</span>
-              <button type="button" onClick={() => setPax((p) => Math.min(9, p + 1))} disabled={pax >= 9} aria-label="Ajouter">
-                +
-              </button>
-            </div>
-          </div>
+          {GUEST_ROWS[tab].map((row) => {
+            const v = getCount(row.key);
+            return (
+              <div className="pax-row" key={row.key}>
+                <div>
+                  <b>{row.title}</b>
+                  {row.sub ? <small>{row.sub}</small> : null}
+                </div>
+                <div className="stepper">
+                  <button type="button" onClick={() => bump(row, -1)} disabled={v <= row.min} aria-label={`Retirer — ${row.title}`}>
+                    −
+                  </button>
+                  <span>{v}</span>
+                  <button type="button" onClick={() => bump(row, 1)} disabled={v >= row.max} aria-label={`Ajouter — ${row.title}`}>
+                    +
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       ) : null}
     </div>

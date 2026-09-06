@@ -615,17 +615,24 @@ header#hdr {
 .cal-clear:hover {
   color: var(--text-2);
 }
+/* Popover voyageurs : mesurée sur airbnb.fr — 425px, lignes 16px/500 + sous-titre
+   14px gris, pas de 55px entre lignes, poignées 32px rondes. */
 .pop-pax {
   right: 0;
-  width: min(400px, 92vw);
-  padding: 16px 32px;
+  width: min(425px, 92vw);
+  padding: 8px 32px 12px;
 }
 .pax-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 16px 0;
+  min-height: 55px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-2);
+}
+.pax-row:last-child {
+  border-bottom: none;
 }
 .pax-row b {
   font-size: 16px;
@@ -1502,6 +1509,141 @@ header#hdr {
   .mini-seg.light {
     display: none;
   }
+}
+
+/* ---------------- Hôtels : cartes à carrousel + carte à épingles ----------------
+   Mesuré sur airbnb.fr : flèches 32px rgba(255,255,255,.9) bordure rgba(0,0,0,.08)
+   ombre 0 2px 4px .18, icône 12px ; points 6px blancs (inactifs 60 %) au pas de 11px. */
+.hcard {
+  display: block;
+  color: inherit;
+}
+.hcard-media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--bg-2);
+}
+.hc-track {
+  display: flex;
+  height: 100%;
+  transition: transform 0.35s var(--ease);
+}
+.hc-slide {
+  position: relative;
+  flex: 0 0 100%;
+  height: 100%;
+}
+.hc-slide img {
+  object-fit: cover;
+}
+.hcard-media .badge {
+  top: 12px;
+  left: 12px;
+}
+.hc-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18);
+  color: var(--text);
+  display: grid;
+  place-items: center;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.hc-arrow svg {
+  width: 12px;
+  height: 12px;
+}
+.hc-arrow.prev {
+  left: 12px;
+}
+.hc-arrow.next {
+  right: 12px;
+}
+.hcard:hover .hc-arrow {
+  opacity: 1;
+}
+.hc-arrow:hover {
+  background: #fff;
+  transform: translateY(-50%) scale(1.04);
+}
+.hc-dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  pointer-events: none;
+}
+.hc-dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+.hc-dots i.on {
+  opacity: 1;
+}
+.hc-name {
+  color: var(--text-2);
+}
+.hcard.active .hcard-media {
+  box-shadow: 0 0 0 2px var(--text);
+}
+
+/* Carte (Leaflet) et épingles de prix façon Airbnb */
+.map-wrap {
+  height: min(660px, calc(100vh - 200px));
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--bg-2);
+}
+.map-loading {
+  min-height: 420px;
+}
+.leaflet-container {
+  font-family: inherit;
+  font-size: 12px;
+}
+.pin-wrap {
+  background: transparent;
+  border: none;
+}
+.pin {
+  position: relative;
+  transform: translate(-50%, -50%);
+  display: inline-block;
+  padding: 6px 8px;
+  border-radius: 28px;
+  background: #fff;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 6px 20px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.15s;
+}
+.pin.on,
+.pin:hover {
+  background: var(--text);
+  color: #fff;
+  transform: translate(-50%, -50%) scale(1.06);
 }
 
 /* ---------------- Modale Filtres (mesurée sur airbnb.fr) ----------------
