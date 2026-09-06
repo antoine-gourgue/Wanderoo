@@ -1504,6 +1504,322 @@ header#hdr {
   }
 }
 
+/* ---------------- Modale Filtres (mesurée sur airbnb.fr) ----------------
+   Dialogue 568px r32, ombre 0 8px 28px .28, en-tête 64px titre 16px/600, contenu
+   padding 24, sections 18px/500 séparées par #EBEBEB, pills 36px/14px r999, histogramme
+   50 barres #E31C5F, curseur 2px + poignées 32px, pied "Tout effacer" + bouton noir 40px. */
+.fchip-main.on {
+  border-color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--text);
+}
+.fchip-badge {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  margin-left: 2px;
+  border-radius: 9px;
+  background: var(--text);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  display: grid;
+  place-items: center;
+}
+.modal-back {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: rgba(0, 0, 0, 0.5);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.modal {
+  width: 568px;
+  max-width: 100%;
+  max-height: min(780px, calc(100vh - 48px));
+  background: var(--bg);
+  border-radius: 32px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.modal-h {
+  position: relative;
+  flex: none;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border-bottom: 1px solid var(--border-2);
+  font-size: 16px;
+  font-weight: 600;
+}
+.modal-x {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+.modal-x:hover {
+  background: var(--bg-2);
+}
+.modal-x svg {
+  width: 16px;
+  height: 16px;
+}
+.modal-b {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 24px;
+}
+.fsec {
+  padding: 32px 0;
+  border-bottom: 1px solid var(--border-2);
+}
+.fsec:last-child {
+  border-bottom: none;
+}
+.fsec h3 {
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 24px;
+  margin: 0 0 16px;
+}
+.fsec-sub {
+  font-size: 14px;
+  color: var(--text-2);
+  margin: -8px 0 16px;
+}
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 8px;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg);
+  font-size: 14px;
+  line-height: 18px;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+.pill svg {
+  width: 16px;
+  height: 16px;
+}
+.pill:hover {
+  border-color: var(--text);
+}
+.pill.on {
+  border-color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--text);
+  background: var(--bg-2);
+}
+.pill-code {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: var(--icon-box);
+  font-size: 10px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+.more-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: underline;
+}
+.more-link svg {
+  width: 14px;
+  height: 14px;
+}
+.hist {
+  height: 60px;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  padding: 0 16px;
+}
+.hist i {
+  flex: 1;
+  display: block;
+  background: #e31c5f;
+  border-radius: 2px 2px 0 0;
+}
+.hist i.off {
+  background: var(--border);
+}
+.range {
+  position: relative;
+  height: 32px;
+  margin: 0 16px;
+}
+.range-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 15px;
+  height: 2px;
+  background: var(--border);
+  border-radius: 2px;
+}
+.range-sel {
+  position: absolute;
+  top: 15px;
+  height: 2px;
+  background: var(--text);
+}
+.range input[type="range"] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 32px;
+  margin: 0;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  pointer-events: none;
+}
+.range input[type="range"]::-webkit-slider-runnable-track {
+  height: 32px;
+  background: transparent;
+}
+.range input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  pointer-events: auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #b0b0b0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  cursor: grab;
+}
+.range input[type="range"]::-moz-range-track {
+  background: transparent;
+}
+.range input[type="range"]::-moz-range-thumb {
+  pointer-events: auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #b0b0b0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  cursor: grab;
+}
+.rng-boxes {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+.rng-box {
+  flex: 1;
+  height: 56px;
+  padding: 8px 12px;
+  border: 1px solid #b0b0b0;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  cursor: text;
+}
+.rng-box:focus-within {
+  border-color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--text);
+}
+.rng-box > span {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-2);
+}
+.rng-val {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 14px;
+}
+.rng-val input {
+  width: 100%;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  color: var(--text);
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.rng-val input::-webkit-outer-spin-button,
+.rng-val input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.rng-dash {
+  flex: none;
+  width: 12px;
+  height: 1px;
+  background: var(--text-2);
+}
+.modal-f {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-2);
+}
+.btn-clear {
+  padding: 8px 0;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: underline;
+}
+.btn-clear:disabled {
+  color: var(--dot);
+  text-decoration: none;
+  cursor: default;
+}
+.btn-apply {
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 8px;
+  background: var(--text);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+.btn-apply:hover {
+  background: #000;
+}
+@media (max-width: 640px) {
+  .modal-back {
+    padding: 12px;
+  }
+  .modal {
+    border-radius: 20px;
+  }
+}
+
 /* ---------------- Authentification ---------------- */
 .auth-wrap {
   max-width: 440px;
