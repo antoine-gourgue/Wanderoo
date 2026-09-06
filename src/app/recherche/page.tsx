@@ -33,6 +33,8 @@ export default async function RecherchePage({
   const depart = one(sp.depart) ?? "2026-03-12";
   const ret = one(sp.return);
   const pax = Number(one(sp.pax) ?? "1") || 1;
+  const fromName = one(sp.fromName) ?? cityName(from);
+  const toName = one(sp.toName) ?? cityName(to);
 
   const dateLabel = [frDate(depart), frDate(ret)].filter(Boolean).join(" – ");
   const paxLabel = `${pax} voyageur${pax > 1 ? "s" : ""}`;
@@ -43,7 +45,7 @@ export default async function RecherchePage({
       <main className="wrap results-wrap">
         <div className="results-head">
           <h1>
-            {cityName(from)} <span className="arw">→</span> {cityName(to)}
+            {fromName} <span className="arw">→</span> {toName}
           </h1>
           <p className="results-meta">
             {dateLabel ? `${dateLabel} · ` : ""}

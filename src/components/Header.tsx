@@ -2,11 +2,10 @@
 
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import SearchBar from "@/components/SearchBar";
 
 type TabKey = "vol" | "hotel" | "car";
-type Seg = { label: string; value: string; placeholder?: boolean };
 
 const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   {
@@ -30,64 +29,16 @@ const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   },
 ];
 
-const PRESETS: Record<TabKey, Seg[]> = {
-  vol: [
-    { label: "Vol depuis", value: "Paris" },
-    { label: "Destination", value: "Lisbonne" },
-    { label: "Dates", value: "12 – 16 mars", placeholder: true },
-    { label: "Voyageurs", value: "1 adulte", placeholder: true },
-  ],
-  hotel: [
-    { label: "Destination", value: "Lisbonne" },
-    { label: "Arrivée", value: "12 mars" },
-    { label: "Départ", value: "16 mars" },
-    { label: "Voyageurs", value: "2 adultes · 1 chambre", placeholder: true },
-  ],
-  car: [
-    { label: "Prise en charge", value: "Aéroport de Lisbonne" },
-    { label: "Restitution", value: "Même agence" },
-    { label: "Dates", value: "12 – 16 mars", placeholder: true },
-    { label: "Âge", value: "25 ans et +", placeholder: true },
-  ],
-};
-
-const ROUTE: Record<TabKey, Record<string, string>> = {
-  vol: { type: "vol", from: "PAR", to: "LIS", depart: "2026-03-12", return: "2026-03-16", pax: "1" },
-  hotel: { type: "hotel", to: "LIS", depart: "2026-03-12", return: "2026-03-16", pax: "2" },
-  car: { type: "car", from: "LIS", depart: "2026-03-12", return: "2026-03-16", pax: "1" },
-};
-
 const TabIcon = ({ children }: { children: React.ReactNode }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.8}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     {children}
   </svg>
 );
 
-const SearchIcon = ({ width = 3 }: { width?: number }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={width} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <circle cx="11" cy="11" r="7" />
-    <path d="m20 20-3.2-3.2" />
-  </svg>
-);
-
 export default function Header() {
-  const router = useRouter();
   const { data: session } = useSession();
   const [tab, setTab] = useState<TabKey>("vol");
   const [shrink, setShrink] = useState(false);
-
-  const goSearch = () => {
-    const q = new URLSearchParams(ROUTE[tab]).toString();
-    router.push(`/recherche?${q}`);
-  };
 
   useEffect(() => {
     let shrunk = false;
@@ -108,12 +59,12 @@ export default function Header() {
 
   const user = session?.user;
   const initial = (user?.name ?? user?.email ?? "?").charAt(0).toUpperCase();
-  const segs = PRESETS[tab];
+  const tabLabel = TABS.find((t) => t.key === tab)?.label;
 
   return (
     <header id="hdr" className={shrink ? "shrink" : undefined}>
       <div className="wrap hdr-main">
-        <a className="logo" href="#" aria-label="Wanderoo, accueil">
+        <a className="logo" href="/" aria-label="Wanderoo, accueil">
           <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
             <path
               d="M16 2c-5 0-9 3.9-9 9 0 6.2 7.4 12.9 8.4 13.7a.9.9 0 0 0 1.2 0C17.6 23.9 25 17.2 25 11c0-5.1-4-9-9-9Z"
@@ -126,13 +77,7 @@ export default function Header() {
 
         <div className="tabs" role="tablist" aria-label="Type de recherche">
           {TABS.map((t) => (
-            <button
-              key={t.key}
-              className="tab"
-              role="tab"
-              aria-selected={tab === t.key}
-              onClick={() => setTab(t.key)}
-            >
+            <button key={t.key} className="tab" role="tab" aria-selected={tab === t.key} onClick={() => setTab(t.key)}>
               <TabIcon>{t.icon}</TabIcon>
               {t.label}
             </button>
@@ -149,11 +94,7 @@ export default function Header() {
               <path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18" />
             </svg>
           </button>
-          <Link
-            className="profile"
-            href={user ? "/compte" : "/connexion"}
-            aria-label={user ? "Mon compte" : "Se connecter"}
-          >
+          <Link className="profile" href={user ? "/compte" : "/connexion"} aria-label={user ? "Mon compte" : "Se connecter"}>
             <span className="burger" aria-hidden="true">
               <span />
               <span />
@@ -172,46 +113,23 @@ export default function Header() {
         </div>
 
         <div className="compact">
-          <button className="compact-pill" onClick={goSearch}>
-            <span className="cp">{TABS.find((t) => t.key === tab)?.label}</span>
-            <span className="cp sub">{segs[1].value}</span>
-            <span className="cp sub">{segs[2].label}</span>
-            <span className="cp sub">{segs[3].label}</span>
+          <button className="compact-pill" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+            <span className="cp">{tabLabel}</span>
+            <span className="cp sub">Destination</span>
+            <span className="cp sub">Dates</span>
+            <span className="cp sub">Voyageurs</span>
             <span className="cp-go">
-              <SearchIcon />
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" />
+                <path d="m20 20-3.2-3.2" />
+              </svg>
             </span>
           </button>
         </div>
       </div>
 
       <div className="wrap hdr-search">
-        <div className="searchpill" role="search">
-          <div className="seg" tabIndex={0}>
-            <span className="sl">{segs[0].label}</span>
-            <span className={`sv${segs[0].placeholder ? " ph" : ""}`}>{segs[0].value}</span>
-          </div>
-          <span className="sdiv" />
-          <div className="seg" tabIndex={0}>
-            <span className="sl">{segs[1].label}</span>
-            <span className={`sv${segs[1].placeholder ? " ph" : ""}`}>{segs[1].value}</span>
-          </div>
-          <span className="sdiv" />
-          <div className="seg" tabIndex={0}>
-            <span className="sl">{segs[2].label}</span>
-            <span className={`sv${segs[2].placeholder ? " ph" : ""}`}>{segs[2].value}</span>
-          </div>
-          <span className="sdiv" />
-          <div className="seg go" tabIndex={0}>
-            <div className="seg-inner">
-              <span className="sl">{segs[3].label}</span>
-              <span className={`sv${segs[3].placeholder ? " ph" : ""}`}>{segs[3].value}</span>
-            </div>
-            <button className="go-btn" aria-label="Rechercher" onClick={goSearch}>
-              <SearchIcon />
-              Rechercher
-            </button>
-          </div>
-        </div>
+        <SearchBar tab={tab} />
       </div>
     </header>
   );
