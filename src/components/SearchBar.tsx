@@ -29,16 +29,26 @@ function frShort(iso: string): string {
   return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", timeZone: "UTC" }).format(d);
 }
 
-export default function SearchBar({ tab }: { tab: TabKey }) {
+export type SearchInitial = {
+  origin?: Place | null;
+  destination?: Place | null;
+  depart?: string;
+  ret?: string;
+  pax?: number;
+};
+
+export default function SearchBar({ tab, initial }: { tab: TabKey; initial?: SearchInitial }) {
   const router = useRouter();
   const wrapRef = useRef<HTMLDivElement>(null);
   const segRefs = useRef<Partial<Record<Field, HTMLDivElement | null>>>({});
 
-  const [origin, setOrigin] = useState<Place | null>({ code: "PAR", name: "Paris", country: "France", type: "city" });
-  const [destination, setDestination] = useState<Place | null>(null);
-  const [depart, setDepart] = useState("");
-  const [ret, setRet] = useState("");
-  const [pax, setPax] = useState(1);
+  const [origin, setOrigin] = useState<Place | null>(
+    initial?.origin ?? { code: "PAR", name: "Paris", country: "France", type: "city" },
+  );
+  const [destination, setDestination] = useState<Place | null>(initial?.destination ?? null);
+  const [depart, setDepart] = useState(initial?.depart ?? "");
+  const [ret, setRet] = useState(initial?.ret ?? "");
+  const [pax, setPax] = useState(initial?.pax ?? 1);
 
   const [open, setOpen] = useState<Field | null>(null);
   const [query, setQuery] = useState("");

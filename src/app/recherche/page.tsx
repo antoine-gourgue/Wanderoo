@@ -1,6 +1,6 @@
-import CreateAlertButton from "@/components/CreateAlertButton";
-import Header from "@/components/Header";
-import OfferRow from "@/components/OfferRow";
+import Header, { type CompactSearch } from "@/components/Header";
+import OffersList from "@/components/OffersList";
+import RouteSidePanel from "@/components/RouteSidePanel";
 import { cityName } from "@/lib/format";
 import { searchFlights } from "@/lib/travelpayouts";
 
@@ -14,20 +14,13 @@ function frDate(iso?: string): string | null {
   if (!iso) return null;
   const d = new Date(`${iso}T12:00:00Z`);
   if (Number.isNaN(d.getTime())) return null;
-  return new Intl.DateTimeFormat("fr-FR", {
-    day: "numeric",
-    month: "long",
-    timeZone: "UTC",
-  }).format(d);
+  return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", timeZone: "UTC" }).format(d);
 }
 
-export default async function RecherchePage({
-  searchParams,
-}: {
-  searchParams: Promise<SP>;
-}) {
+export default async function RecherchePage({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
-  const type = one(sp.type) ?? "vol";
+  const rawType = one(sp.type);
+  const tab = rawType === "hotel" || rawType === "car" ? rawType : "vol";
   const from = (one(sp.from) ?? "PAR").toUpperCase();
   const to = (one(sp.to) ?? "LIS").toUpperCase();
   const depart = one(sp.depart) ?? "2026-03-12";
@@ -39,85 +32,63 @@ export default async function RecherchePage({
   const dateLabel = [frDate(depart), frDate(ret)].filter(Boolean).join(" – ");
   const paxLabel = `${pax} voyageur${pax > 1 ? "s" : ""}`;
 
-  return (
-    <>
-      <Header />
-      <main className="wrap results-wrap">
-        <div className="results-head">
-          <h1>
-            {fromName} <span className="arw">→</span> {toName}
-          </h1>
-          <p className="results-meta">
-            {dateLabel ? `${dateLabel} · ` : ""}
-            {paxLabel}
-          </p>
-        </div>
+  const compact: CompactSearch = {
+    label: `${fromName} → ${toName}`,
+    dates: dateLabel || "Dates",
+    pax: paxLabel,
+    tab,
+    initial: {
+      origin: { code: from, name: fromName, country: "", type: "city" },
+      destination: { code: to, name: toName, country: "", type: "city" },
+      depart,
+      ret: ret ?? "",
+      pax,
+    },
+  };
 
-        {type !== "vol" ? (
+  if (tab !== "vol") {
+    return (
+      <>
+        <Header compact={compact} />
+        <main className="wrap res-body">
           <div className="soon">
             <h2>Bientôt disponible</h2>
             <p>
-              La comparaison {type === "hotel" ? "d'hôtels" : "de voitures"} arrive
-              très vite. Pour l&apos;instant, seuls les vols sont comparés.
+              La comparaison {tab === "hotel" ? "d'hôtels" : "de voitures"} arrive très vite. Pour l&apos;instant, seuls les
+              vols sont comparés.
             </p>
           </div>
-        ) : (
-          <FlightResults from={from} to={to} depart={depart} ret={ret} pax={pax} />
-        )}
-      </main>
-    </>
-  );
-}
+        </main>
+      </>
+    );
+  }
 
-async function FlightResults({
-  from,
-  to,
-  depart,
-  ret,
-  pax,
-}: {
-  from: string;
-  to: string;
-  depart: string;
-  ret?: string;
-  pax: number;
-}) {
-  const { offers, source } = await searchFlights({
-    from,
-    to,
-    depart,
-    return: ret,
-    passengers: pax,
-  });
+  const { offers, source } = await searchFlights({ from, to, depart, return: ret, passengers: pax });
+  const best = offers[0]?.price ?? 0;
+  const avg = offers.length ? Math.round(offers.reduce((s, o) => s + o.price, 0) / offers.length) : 0;
 
   return (
     <>
-      <div className="results-bar">
-        <span className="results-count">
-          {offers.length} offre{offers.length > 1 ? "s" : ""} · triées par prix
-        </span>
-        {source === "mock" ? (
-          <span className="results-demo">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <circle cx="12" cy="12" r="9" />
-              <path d="M12 8h.01M11 12h1v4h1" />
-            </svg>
-            Données de démonstration — ajoutez un token Travelpayouts pour les vrais prix
-          </span>
-        ) : null}
-        <CreateAlertButton type="vol" from={from} to={to} bestPrice={offers[0]?.price} />
-      </div>
-
-      <div className="offers">
-        {offers.map((o, i) => (
-          <OfferRow key={o.id} offer={o} best={i === 0} />
-        ))}
-      </div>
-
-      <p className="affiliate-note">
-        Wanderoo peut toucher une commission si vous réservez via un partenaire. Le
-        prix que vous payez reste identique.
-      </p>
+      <Header compact={compact} />
+      <OffersList
+        offers={offers}
+        title={`${fromName} → ${toName}`}
+        demo={source === "mock"}
+        side={
+          <RouteSidePanel
+            from={from}
+            to={to}
+            fromName={fromName}
+            toName={toName}
+            dateLabel={dateLabel}
+            paxLabel={paxLabel}
+            best={best}
+            avg={avg}
+            count={offers.length}
+            live={source === "live"}
+          />
+        }
+      />
     </>
   );
 }
